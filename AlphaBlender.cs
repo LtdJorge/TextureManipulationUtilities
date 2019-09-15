@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using Editor.TextureManipulationUtilities.Util;
 using Unity.Collections;
 using Unity.Jobs;
@@ -117,10 +118,8 @@ class AlphaBlender : EditorWindow
         {
             var RGBColors = new NativeArray<Color>(_RGB.GetPixels().Length, Allocator.TempJob);
             var AlphaColors = new NativeArray<Color>(_RGB.GetPixels().Length, Allocator.TempJob);
-            var rgbPixels = _RGB.GetPixels();
-            var alphapixels = _alpha.GetPixels();
-            RGBColors.CopyFrom(rgbPixels);
-            AlphaColors.CopyFrom(alphapixels);
+            RGBColors.CopyFrom(_RGB.GetPixels());
+            AlphaColors.CopyFrom(_alpha.GetPixels());
             var tempArray = new NativeArray<Color>(RGBColors.Length, Allocator.TempJob);
 
             var job = new PackPixelsJob()
@@ -130,7 +129,7 @@ class AlphaBlender : EditorWindow
                 OutputTexture = tempArray
             };
 
-            JobHandle handle = job.Schedule(tempArray.Length, 1);
+            var handle = job.Schedule(tempArray.Length, 16);
             handle.Complete();
             FinalTexture.SetPixels(tempArray.ToArray());
             RGBColors.Dispose();
@@ -140,6 +139,7 @@ class AlphaBlender : EditorWindow
         }
         else
         {
+            EditorUtility.DisplayProgressBar("Packing texture", "This should be fast!", 0.0f);
             for (var x = 0; x < texSize.x; x++)
             {
                 for (var y = 0; y < texSize.y; y++)
@@ -151,44 +151,13 @@ class AlphaBlender : EditorWindow
                     var A = _alpha.GetPixel(x, y).r;
 
                     FinalTexture.SetPixel(x, y, new Color(R, G, B, A));
-                    //EditorUtility.DisplayProgressBar("Packing texture", "", ((y-1)*texSize.x+x)/texSize.x*texSize.y);
+                    //TODO: Is it possible to implement a realistic progressbar?
+                    //EditorUtility.DisplayProgressBar("Packing texture", "This should be fast!", ((y-1)*texSize.x+x)/texSize.x*texSize.y);
                 }
+                EditorUtility.DisplayProgressBar("Packing texture", "This should be fast!", x/texSize.x*texSize.y);
+                Debug.Log(Convert.ToString(x / texSize.x * texSize.y));
             }
         }
-
-        /*
-        var pixelArray = new NativeArray<float>(_RGB.GetRawTextureData<float>().Length, Allocator.TempJob);
-        var finalBuffer = new NativeArray<float>(_RGB.GetRawTextureData<float>().Length, Allocator.TempJob);
-        Debug.Log(_RGB.GetRawTextureData<float>().Length);
-        var job = new PackPixelsJob
-        {
-            RGBTex = _RGB.GetRawTextureData<float>(),
-            AlphaTex = _alpha.GetRawTextureData<float>(),
-            IntermediateTex = pixelArray,
-            FinalTex = finalBuffer
-        };
-        JobHandle handle = job.Schedule(finalBuffer.Length, 1);
-        handle.Complete();
-
-        pixelArray.CopyTo(finalBuffer);
-        FinalTexture.LoadRawTextureData(finalBuffer);
-        pixelArray.Dispose();
-        finalBuffer.Dispose();*/
-
-        /*for (var x = 0; x < texSize.x; x++)
-        {
-            for (var y = 0; y < texSize.y; y++)
-            {
-                var R = _RGB.GetPixel(x, y).r;
-                var G = _RGB.GetPixel(x, y).g;
-                var B = _RGB.GetPixel(x, y).b;
-
-                var A = _alpha.GetPixel(x, y).r;
-
-                FinalTexture.SetPixel(x, y, new Color(R, G, B, A));
-                //EditorUtility.DisplayProgressBar("Packing texture", "", ((y-1)*texSize.x+x)/texSize.x*texSize.y);
-            }
-        }*/
 
         FinalTexture.Apply();
         EditorUtility.ClearProgressBar();

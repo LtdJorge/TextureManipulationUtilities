@@ -1,5 +1,6 @@
 ﻿using UnityEditor;
 using UnityEngine;
+using UnityEngine.Experimental.Rendering;
 
 namespace Editor.TextureManipulationUtilities
 {
@@ -9,7 +10,10 @@ namespace Editor.TextureManipulationUtilities
 
         private Vector2 scrollPos;
         private static EditorWindow window;
-        private Channels channel;
+        private bool flipRed;
+        private bool flipGreen;
+        private bool flipBlue;
+        private bool flipAlpha;
         private bool saveToDifferentTexture;
 
         private enum Channels
@@ -53,29 +57,35 @@ namespace Editor.TextureManipulationUtilities
             GUILayout.BeginVertical(EditorStyles.helpBox);
             textureMap = (Texture2D) EditorGUILayout.ObjectField("Normal Map", textureMap, typeof(Texture2D), false);
 
-            if (GUILayout.Toggle(false, "Flip red channel"))
-            {
-                channel = Channels.Red;
-            }
+            flipRed = GUILayout.Toggle(false, "Flip red channel");
 
-            if (GUILayout.Toggle(true, "Flip green channel (use this for normal maps)"))
-            {
-                channel = Channels.Green;
-            }
+            flipGreen = GUILayout.Toggle(true, "Flip green channel (use this for normal maps)");
 
-            if (GUILayout.Toggle(false, "Flip blue channel"))
-            {
-                channel = Channels.Blue;
-            }
+            flipBlue = GUILayout.Toggle(false, "Flip blue channel");
 
-            if (GUILayout.Toggle(false, "Flip alpha channel"))
-            {
-                channel = Channels.Alpha;
-            }
+            flipAlpha = GUILayout.Toggle(false, "Flip alpha channel");
 
             if (GUILayout.Button("Flip normal height"))
             {
-                FlipChannel(channel);
+                if (flipRed)
+                {
+                    FlipChannel(Channels.Red);
+                }
+
+                if (flipGreen)
+                {
+                    FlipChannel(Channels.Green);
+                }
+
+                if (flipBlue)
+                {
+                    FlipChannel(Channels.Blue);
+                }
+
+                if (flipAlpha)
+                {
+                    FlipChannel(Channels.Alpha);
+                }
             }
 
             saveToDifferentTexture =
@@ -93,7 +103,9 @@ namespace Editor.TextureManipulationUtilities
 
         private void FlipChannel(Channels _channel)
         {
-            var tempTexture = textureMap;
+            var tempTexture = new Texture2D(textureMap.width, textureMap.height, textureMap.graphicsFormat, TextureCreationFlags.None);
+
+
         }
     }
 }

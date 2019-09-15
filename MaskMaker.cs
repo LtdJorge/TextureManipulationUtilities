@@ -8,10 +8,12 @@
 
 /*
  * The above notice was written by https://www.reddit.com/user/Diabolickal/, the creator of the original script.
- * Some fixes and the jobified part were done by me, https://github.com/LtdJorge
+ * https://www.reddit.com/r/Unity3D/comments/9kz8kd/updated_hdrp_mask_map_packer/
+ * Some fixes and the jobified part (soon) were done by me, https://github.com/LtdJorge
  */
 
 using System.IO;
+using Editor.TextureManipulationUtilities.Util;
 using UnityEditor;
 using UnityEngine;
 
@@ -34,7 +36,7 @@ namespace Editor.TextureManipulationUtilities
         private Texture2D r_Smooth_Rough;
 
         private float defaultMetal;
-        private float defaultAO = 1f;
+        private float defaultAO;
         private float defaultDetail;
         private float defaultSmooth;
 
@@ -75,25 +77,22 @@ namespace Editor.TextureManipulationUtilities
                 GUILayout.BeginVertical();
                 scrollPos = GUILayout.BeginScrollView(scrollPos, false, true, GUILayout.ExpandHeight(true));
             }
-            
 
+            GUIStyle BigBold = new GUIStyle
+            {
+                fontSize = 16, fontStyle = FontStyle.Bold, wordWrap = true, alignment = TextAnchor.MiddleCenter
+            };
 
-            GUIStyle BigBold = new GUIStyle();
-            BigBold.fontSize = 16;
-            BigBold.fontStyle = FontStyle.Bold;
-            BigBold.wordWrap = true;
-            BigBold.alignment = TextAnchor.MiddleCenter;
+            GUIStyle Wrap = new GUIStyle {wordWrap = true, alignment = TextAnchor.MiddleCenter};
 
-            GUIStyle Wrap = new GUIStyle();
-            Wrap.wordWrap = true;
-            Wrap.alignment = TextAnchor.MiddleCenter;
-
-            GUIStyle warn = new GUIStyle();
-            warn.richText = true;
-            warn.wordWrap = true;
-            warn.fontStyle = FontStyle.Bold;
-            warn.alignment = TextAnchor.MiddleCenter;
-            warn.normal.textColor = new Color(0.7f,0,0);
+            GUIStyle warn = new GUIStyle
+            {
+                richText = true,
+                wordWrap = true,
+                fontStyle = FontStyle.Bold,
+                alignment = TextAnchor.MiddleCenter,
+                normal = {textColor = new Color(0.7f, 0, 0)}
+            };
 
             GUIStyle preview = new GUIStyle();
             preview.alignment = TextAnchor.UpperCenter;
@@ -159,6 +158,8 @@ namespace Editor.TextureManipulationUtilities
             //Roughness/Smoothness
             GUILayout.BeginVertical(EditorStyles.helpBox);
             GUILayout.Space(10f);
+
+            // ReSharper disable once AssignmentInConditionalExpression
             if (useRough = EditorGUILayout.Toggle("Input Is Roughness Map", useRough))
                 Smooth_Rough = (Texture2D)EditorGUILayout.ObjectField("Rough Map (A)", Smooth_Rough, typeof(Texture2D), false);
             else
@@ -269,12 +270,10 @@ namespace Editor.TextureManipulationUtilities
             GUILayout.Label("Output texture will be the same height and width as input", Wrap);
         
             GUILayout.Space(100);
-            if (window)
-            {
-                GUILayout.EndScrollView();
-                GUILayout.EndVertical();
-                GUILayout.EndArea();
-            }
+            if (!window) return;
+            GUILayout.EndScrollView();
+            GUILayout.EndVertical();
+            GUILayout.EndArea();
         }
 
         private void UpdateTexture(bool asPreview)
@@ -282,33 +281,24 @@ namespace Editor.TextureManipulationUtilities
             finalTexture = new Texture2D(texSize.x, texSize.y, TextureFormat.RGBAFloat, true);
 
             if (Metallic)
-                r_Metallic = duplicateTexture(Metallic);
+                r_Metallic = DuplicateTexture.duplicateTexture(Metallic);
             if (AmbientOcclusion)
-                r_AmbientOcclusion = duplicateTexture(AmbientOcclusion);
+                r_AmbientOcclusion = DuplicateTexture.duplicateTexture(AmbientOcclusion);
             if (DetailMask)
-                r_DetailMask = duplicateTexture(DetailMask);
+                r_DetailMask = DuplicateTexture.duplicateTexture(DetailMask);
             if (Smooth_Rough)
-                r_Smooth_Rough = duplicateTexture(Smooth_Rough);
+                r_Smooth_Rough = DuplicateTexture.duplicateTexture(Smooth_Rough);
 
-            for (int x = 0; x < texSize.x; x++)
+            for (var x = 0; x < texSize.x; x++)
             {
-                for (int y = 0; y < texSize.y; y++)
+                for (var y = 0; y < texSize.y; y++)
                 {
-                    float R, G, B, A;
-                    if (Metallic)
-                        R = r_Metallic.GetPixel(x, y).r;
-                    else
-                        R = defaultMetal;
+                    float A;
+                    var R = Metallic ? r_Metallic.GetPixel(x, y).r : defaultMetal;
 
-                    if (AmbientOcclusion)
-                        G = r_AmbientOcclusion.GetPixel(x, y).r;
-                    else
-                        G = defaultAO;
+                    var G = AmbientOcclusion ? r_AmbientOcclusion.GetPixel(x, y).r : defaultAO;
 
-                    if (DetailMask)
-                        B = r_DetailMask.GetPixel(x, y).r;
-                    else
-                        B = defaultDetail;
+                    var B = DetailMask ? r_DetailMask.GetPixel(x, y).r : defaultDetail;
 
                     if (Smooth_Rough)
                     {
@@ -348,22 +338,6 @@ namespace Editor.TextureManipulationUtilities
             AssetDatabase.Refresh();
        
             Debug.Log("Texture Saved to: " + path);
-        }
-
-
-        Texture2D duplicateTexture(Texture2D source)
-        {
-            RenderTexture renderTex = RenderTexture.GetTemporary(source.width,source.height,0,RenderTextureFormat.ARGBFloat,RenderTextureReadWrite.sRGB);
-
-            Graphics.Blit(source, renderTex);
-            RenderTexture previous = RenderTexture.active;
-            RenderTexture.active = renderTex;
-            Texture2D readableText = new Texture2D(source.width, source.height);
-            readableText.ReadPixels(new Rect(0, 0, renderTex.width, renderTex.height), 0, 0);
-            readableText.Apply();
-            RenderTexture.active = previous;
-            RenderTexture.ReleaseTemporary(renderTex);
-            return readableText;
         }
     }
 }
