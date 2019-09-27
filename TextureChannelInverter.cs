@@ -11,10 +11,11 @@ namespace Editor.TextureManipulationUtilities
         private Vector2 scrollPos;
         private static EditorWindow window;
         private bool flipRed;
-        private bool flipGreen;
+        private bool flipGreen = true;
         private bool flipBlue;
         private bool flipAlpha;
         private bool saveToDifferentTexture;
+        private bool textureHasAlpha;
 
         private enum Channels
         {
@@ -24,7 +25,9 @@ namespace Editor.TextureManipulationUtilities
             Alpha
         }
 
-        [MenuItem("Tools/NormalMapInverter")]
+        private int channelToFlip = 1;
+
+        [MenuItem("Tools/TextureChannelInverter")]
         public static void ShowWindow()
         {
             window = GetWindow(typeof(TextureChannelInverter), false);
@@ -57,15 +60,23 @@ namespace Editor.TextureManipulationUtilities
             GUILayout.BeginVertical(EditorStyles.helpBox);
             textureMap = (Texture2D) EditorGUILayout.ObjectField("Normal Map", textureMap, typeof(Texture2D), false);
 
-            flipRed = GUILayout.Toggle(false, "Flip red channel");
+            /*
+            flipRed = GUILayout.Toggle(flipRed, "Flip red channel");
 
-            flipGreen = GUILayout.Toggle(true, "Flip green channel (use this for normal maps)");
+            flipGreen = GUILayout.Toggle(flipGreen, "Flip green channel (use this for normal maps)");
 
-            flipBlue = GUILayout.Toggle(false, "Flip blue channel");
+            flipBlue = GUILayout.Toggle(flipBlue, "Flip blue channel");
 
-            flipAlpha = GUILayout.Toggle(false, "Flip alpha channel");
+            flipAlpha = GUILayout.Toggle(flipAlpha, "Flip alpha channel");
 
-            if (GUILayout.Button("Flip normal height"))
+            */
+            string[] texts = { "Flip red channel", "Flip green channel (use this for normal maps)", "Flip blue channel", "Flip alpha channel" };
+
+            channelToFlip = GUILayout.SelectionGrid(channelToFlip, texts, 1);
+
+            GUILayout.Space(20f);
+
+            if (GUILayout.Button("Flip selected channel"))
             {
                 if (flipRed)
                 {
@@ -105,7 +116,26 @@ namespace Editor.TextureManipulationUtilities
         {
             var tempTexture = new Texture2D(textureMap.width, textureMap.height, textureMap.graphicsFormat, TextureCreationFlags.None);
 
-
+            int x = textureMap.width;
+            int y = textureMap.height;
+            for(int i = 0; i < x; i++)
+            {
+                for (int j = 0; j < y; j++)
+                {
+                    if(textureMap.format == TextureFormat.DXT5)
+                    tempTexture.SetPixel(i, j, new Color(textureMap.GetPixel(i, j).r, textureMap.GetPixel(i, j).g, textureMap.GetPixel(i, j).b));
+                }
+            }
+            if(_channel == Channels.Green)
+            {
+                for (int i = 0; i < x; i++)
+                {
+                    for (int j = 0; j < y; j++)
+                    {
+                        tempTexture.SetPixel(i, j, new Color(textureMap.GetPixel(i, j).r, textureMap.GetPixel(i, j).g, textureMap.GetPixel(i, j).b));
+                    }
+                }
+            }
         }
     }
 }
