@@ -14,14 +14,13 @@ namespace Editor.TextureManipulationUtilities.Util
             {
                 return true;
             }
-            else if (texture.format == TextureFormat.DXT1)
+
+            if (texture.format == TextureFormat.DXT1)
             {
                 return false;
             }
-            else
-            {
-                Debug.Log("Texture format not recognised for texture " + texture.name);
-            }
+
+            Debug.Log("Texture format not recognized for texture " + texture.name);
             return false;
         }
     }

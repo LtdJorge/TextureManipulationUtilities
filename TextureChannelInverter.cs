@@ -1,6 +1,8 @@
-﻿using UnityEditor;
+﻿using System.IO;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.Experimental.Rendering;
+using Editor.TextureManipulationUtilities.Util;
 
 namespace Editor.TextureManipulationUtilities
 {
@@ -58,7 +60,7 @@ namespace Editor.TextureManipulationUtilities
 
             GUILayout.Space(20f);
             GUILayout.BeginVertical(EditorStyles.helpBox);
-            textureMap = (Texture2D) EditorGUILayout.ObjectField("Normal Map", textureMap, typeof(Texture2D), false);
+            textureMap = (Texture2D) EditorGUILayout.ObjectField("Texture", textureMap, typeof(Texture2D), false);
 
             /*
             flipRed = GUILayout.Toggle(flipRed, "Flip red channel");
@@ -78,6 +80,8 @@ namespace Editor.TextureManipulationUtilities
 
             if (GUILayout.Button("Flip selected channel"))
             {
+                FlipChannel((Channels)channelToFlip);
+                /*
                 if (flipRed)
                 {
                     FlipChannel(Channels.Red);
@@ -96,11 +100,11 @@ namespace Editor.TextureManipulationUtilities
                 if (flipAlpha)
                 {
                     FlipChannel(Channels.Alpha);
-                }
+                }*/
             }
 
             saveToDifferentTexture =
-                GUILayout.Toggle(false, "Check to save to a new texture. Leave unchecked to overwrite.");
+                GUILayout.Toggle(saveToDifferentTexture, "Check to save to a new texture. Leave unchecked to overwrite.");
 
             GUILayout.Space(10f);
             GUILayout.EndVertical();
@@ -114,28 +118,96 @@ namespace Editor.TextureManipulationUtilities
 
         private void FlipChannel(Channels _channel)
         {
-            var tempTexture = new Texture2D(textureMap.width, textureMap.height, textureMap.graphicsFormat, TextureCreationFlags.None);
+            //TODO: Funciona pero solo para texturas con alpha, hay que hacerlo para las otras
+            var tempTexture = new Texture2D(textureMap.width, textureMap.height, TextureFormat.RGBAFloat, true);
+            var dupTexture = DuplicateTexture.duplicateTexture(textureMap);
+            var x = textureMap.width;
+            var y = textureMap.height;
 
-            int x = textureMap.width;
-            int y = textureMap.height;
-            for(int i = 0; i < x; i++)
+            var hasAlpha = HasAlpha.hasAlpha(textureMap);
+            
+            //Invert green of texture with alpha
+            if (hasAlpha && _channel == Channels.Green)
             {
-                for (int j = 0; j < y; j++)
+                for(var i = 0; i < x; i++)
                 {
-                    if(textureMap.format == TextureFormat.DXT5)
-                    tempTexture.SetPixel(i, j, new Color(textureMap.GetPixel(i, j).r, textureMap.GetPixel(i, j).g, textureMap.GetPixel(i, j).b));
-                }
-            }
-            if(_channel == Channels.Green)
-            {
-                for (int i = 0; i < x; i++)
-                {
-                    for (int j = 0; j < y; j++)
+                    for (var j = 0; j < y; j++)
                     {
-                        tempTexture.SetPixel(i, j, new Color(textureMap.GetPixel(i, j).r, textureMap.GetPixel(i, j).g, textureMap.GetPixel(i, j).b));
+                        tempTexture.SetPixel(i, j, new Color(dupTexture.GetPixel(i, j).r, 1-dupTexture.GetPixel(i, j).g, dupTexture.GetPixel(i, j).b, dupTexture.GetPixel(i,j).a));
+
                     }
                 }
             }
+            //Invert alpha
+            else if (hasAlpha && _channel == Channels.Alpha)
+            {
+                for(var i = 0; i < x; i++)
+                {
+                    for (var j = 0; j < y; j++)
+                    {
+                        tempTexture.SetPixel(i, j, new Color(dupTexture.GetPixel(i, j).r, dupTexture.GetPixel(i, j).g, dupTexture.GetPixel(i, j).b, 1-dupTexture.GetPixel(i,j).a));
+
+                    }
+                }
+            }
+            //Invert red of image with alpha
+            else if (hasAlpha && _channel == Channels.Red)
+            {
+                for(var i = 0; i < x; i++)
+                {
+                    for (var j = 0; j < y; j++)
+                    {
+                        tempTexture.SetPixel(i, j, new Color(1-dupTexture.GetPixel(i, j).r, dupTexture.GetPixel(i, j).g, dupTexture.GetPixel(i, j).b, dupTexture.GetPixel(i,j).a));
+
+                    }
+                }
+            }
+            //Invert blue of image with alpha
+            else if (hasAlpha && _channel == Channels.Blue)
+            {
+                for(var i = 0; i < x; i++)
+                {
+                    for (var j = 0; j < y; j++)
+                    {
+                        tempTexture.SetPixel(i, j, new Color(dupTexture.GetPixel(i, j).r, dupTexture.GetPixel(i, j).g, 1-dupTexture.GetPixel(i, j).b, dupTexture.GetPixel(i,j).a));
+                    }
+                }
+            }
+
+            tempTexture.Apply();
+            string path;
+            if (saveToDifferentTexture)
+            {
+                path = EditorUtility.SaveFilePanelInProject("Save texture to directory", textureMap.name+"Inverted", "png", "Saved");    
+            }
+            else
+            {
+                path = EditorUtility.SaveFilePanelInProject("Save texture to directory", textureMap.name, "png", "Saved");    
+            }
+
+            var textureData = tempTexture.EncodeToPNG();
+            if (path.Length == 0) return;
+            if (textureData != null)
+            {
+                File.WriteAllBytes(path, textureData);
+            }
+
+            AssetDatabase.Refresh();
+
+            Debug.Log("Saved");
+
+            /*
+            if(_channel == Channels.Green)
+            {
+                for (var i = 0; i < x; i++)
+                {
+                    for (var j = 0; j < y; j++)
+                    {
+                        tempTexture.SetPixel(i, j, new Color(textureMap.GetPixel(i, j).r, 1-textureMap.GetPixel(i, j).g, textureMap.GetPixel(i, j).b));
+                    }
+                }
+            }
+            */
         }
     }
 }
