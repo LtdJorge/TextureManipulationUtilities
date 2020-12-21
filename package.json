@@ -1,1 +1,7 @@
-
+{
+    "name": "com.ltdjorge.tmu",
+    "version": "1.0.0",
+    "displayName": "TextureManipulationUtilities",
+    "description": "This package is a compilation of high-performance utilities that speed-up some common texture tasks and let you manipulate texture channels, without needing an external program.",
+    "unity": "2019.1"
+}
