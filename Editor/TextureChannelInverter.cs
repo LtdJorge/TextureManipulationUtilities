@@ -1,10 +1,9 @@
 ﻿using System.IO;
+using TextureManipulationUtilities.Editor.Util;
 using UnityEditor;
 using UnityEngine;
-using UnityEngine.Experimental.Rendering;
-using Editor.TextureManipulationUtilities.Util;
 
-namespace Editor.TextureManipulationUtilities
+namespace TextureManipulationUtilities.Editor
 {
     public class TextureChannelInverter : EditorWindow
     {
