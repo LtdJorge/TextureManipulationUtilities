@@ -3,7 +3,7 @@ using Unity.Collections;
 using Unity.Jobs;
 using UnityEngine;
 
-namespace Editor.TextureManipulationUtilities.Util
+namespace TextureManipulationUtilities.Editor.Util
 {
     [BurstCompile]
     public struct PackPixelsJob : IJobParallelFor

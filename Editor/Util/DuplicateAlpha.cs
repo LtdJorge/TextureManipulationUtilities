@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace Editor.TextureManipulationUtilities.Util
+namespace TextureManipulationUtilities.Editor.Util
 {
     public class DuplicateAlpha
     {

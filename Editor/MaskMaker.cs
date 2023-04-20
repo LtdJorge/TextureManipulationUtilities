@@ -13,11 +13,11 @@
  */
 
 using System.IO;
-using Editor.TextureManipulationUtilities.Util;
+using TextureManipulationUtilities.Editor.Util;
 using UnityEditor;
 using UnityEngine;
 
-namespace Editor.TextureManipulationUtilities
+namespace TextureManipulationUtilities.Editor
 {
     public class MaskMaker : EditorWindow {
 
