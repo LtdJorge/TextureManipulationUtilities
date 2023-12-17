@@ -5,7 +5,9 @@ using UnityEngine;
 
 namespace TextureManipulationUtilities.Editor.Util
 {
+#if HAS_BURST
     [BurstCompile]
+#endif
     public struct PackPixelsJob : IJobParallelFor
     {
         [ReadOnly] public NativeArray<Color> RGBColors;

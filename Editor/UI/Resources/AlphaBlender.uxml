@@ -1,0 +1,18 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="True">
+    <Style src="project://database/Assets/TextureManipulationUtilities/Editor/UI/Resources/AlphaBlender.uss?fileID=7433441132597879392&amp;guid=f392d89cd86f1d30a90070eae2f067a0&amp;type=3#AlphaBlender" />
+    <ui:Foldout text="Description" value="false">
+        <ui:Label text="Packs a three channel (RGB) texture with an Alpha channel texture (or optionally, 4 separate channels)" class="description" />
+    </ui:Foldout>
+    <ui:ListView />
+    <ui:Label text="Label" style="text-overflow: ellipsis;" />
+    <uie:ObjectField type="UnityEngine.Texture2D, UnityEngine.CoreModule" allow-scene-objects="false" label="RGB texture" />
+    <uie:ObjectField type="UnityEngine.Texture2D, UnityEngine.CoreModule" allow-scene-objects="false" label="Alpha texture" />
+    <ui:Toggle label="Use source parameters" tooltip="Use the source textures&apos; parameters as the output texture parameters" value="true" enabled="true" data-source="project://database/Assets/TextureManipulationUtilities/Editor/UI/New%20Computed%20Settings.asset?fileID=11400000&amp;guid=c136ba0bf39e7cc5bab6bdc20072a70b&amp;type=2#New Computed Settings">
+        <Bindings>
+            <ui:DataBinding property="enabledSelf" data-source-path="tex1EqualsTex2" binding-mode="ToTarget" />
+        </Bindings>
+    </ui:Toggle>
+    <ui:Foldout text="Backend selection">
+        <ui:RadioButtonGroup choices="Base,Job System,GPU" />
+    </ui:Foldout>
+</ui:UXML>

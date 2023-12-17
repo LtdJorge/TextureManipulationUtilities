@@ -12,7 +12,9 @@ namespace TextureManipulationUtilities.Editor
         private Vector2 scrollPos;
         private static EditorWindow window;
         private bool flipRed;
-        private bool flipGreen = true;
+#pragma warning disable CS0414 // Field is assigned but its value is never used
+        private bool _flipGreen = true;
+#pragma warning restore CS0414 // Field is assigned but its value is never used
         private bool flipBlue;
         private bool flipAlpha;
         private bool saveToDifferentTexture;
