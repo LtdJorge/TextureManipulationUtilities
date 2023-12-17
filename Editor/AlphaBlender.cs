@@ -1,12 +1,12 @@
 ﻿using System;
 using System.IO;
-using TextureManipulationUtilities.Editor.Util;
+using TextureManipulationUtilities.Util;
 using Unity.Collections;
 using Unity.Jobs;
 using UnityEditor;
 using UnityEngine;
 
-namespace TextureManipulationUtilities.Editor
+namespace TextureManipulationUtilities
 {
     public class AlphaBlender : EditorWindow
     {

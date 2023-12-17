@@ -3,7 +3,7 @@ using Unity.Collections;
 using Unity.Jobs;
 using UnityEngine;
 
-namespace TextureManipulationUtilities.Editor.Util
+namespace TextureManipulationUtilities.Util
 {
 #if HAS_BURST
     [BurstCompile]

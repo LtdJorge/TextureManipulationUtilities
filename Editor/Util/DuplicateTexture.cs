@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace TextureManipulationUtilities.Editor.Util
+namespace TextureManipulationUtilities.Util
 {
     public class DuplicateTexture
     {

@@ -2,7 +2,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace TextureManipulationUtilities.Editor.UI
+namespace TextureManipulationUtilities.UI
 {
     public class AlphaBlender : EditorWindow
     {

@@ -1,7 +1,7 @@
 using UnityEditor;
 using UnityEngine;
 
-namespace TextureManipulationUtilities.Editor.UI
+namespace TextureManipulationUtilities.UI
 {
     [CreateAssetMenu(menuName = "TMU Settings Asset")]
     public class ComputedSettings : ScriptableObject

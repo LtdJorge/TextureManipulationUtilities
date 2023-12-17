@@ -1,8 +1,9 @@
 {
     "name": "TMU",
-    "rootNamespace": "",
+    "rootNamespace": "TextureManipulationUtilities",
     "references": [
-        "GUID:2665a8d13d1b3f18800f46e256720795"
+        "GUID:2665a8d13d1b3f18800f46e256720795",
+        "GUID:e0cd26848372d4e5c891c569017e11f1"
     ],
     "includePlatforms": [
         "Editor"
@@ -18,6 +19,11 @@
             "name": "com.unity.burst",
             "expression": "0.0.0",
             "define": "HAS_BURST"
+        },
+        {
+            "name": "com.unity.collections",
+            "expression": "0.0.0",
+            "define": "HAS_COLLECTIONS"
         }
     ],
     "noEngineReferences": false
