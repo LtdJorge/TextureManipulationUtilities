@@ -34,5 +34,4 @@ sysinfo.txt
 *.unitypackage
 
 # Unwanted assets
-*.asset
 x64/
